@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ThingSpeak Data Display</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    h1 {
+      color: #007BFF;
+    }
+
+    #data-container {
+      margin-top: 20px;
+    }
+
+    .entry {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #fff;
+    }
+
+    .entry p {
+      margin: 5px 0;
+    }
+
+    .entry hr {
+      border: none;
+      border-top: 1px solid #ddd;
+    }
+
+    .no-data {
+      color: #dc3545;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ThingSpeak Data Display</h1>
+
+  <div id="data-container"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', fetchData);
+
+    async function fetchData() {
+      const apiKey = '1MI65M4H3EGE23FD';
+      const channelId = '2378845';
+      const results = '2';
+
+      const url = `https://api.thingspeak.com/channels/${channelId}/feeds.json?api_key=${apiKey}&results=${results}`;
+
+      try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        displayData(data);
+      } catch (error) {
+        console.error('Error fetching data:', error.message);
+      }
+    }
+
+    function displayData(data) {
+      const container = document.getElementById('data-container');
+      container.innerHTML = '<h2>Recent Data:</h2>';
+
+      if (data && data.feeds) {
+        data.feeds.forEach(feed => {
+          const date = new Date(feed.created_at);
+          const formattedDate = date.toLocaleString();
+
+          const entry = document.createElement('div');
+          entry.classList.add('entry');
+          entry.innerHTML = `
+                             <p><strong>VOLTAGE:</strong> ${feed.field1}</p>
+                             <p><strong>INTENSITY OF LIGHT:</strong> ${feed.field2}</p>
+                             <p><strong>INTENSITY OF LIGHT 2:</strong> ${feed.field3}</p>
+                             <p><strong>LONGITUDE:</strong> ${feed.field4}</p>
+                             <p><strong>LATITUDE:</strong> ${feed.field5}</p>
+
+                             <hr>`;
+
+          container.appendChild(entry);
+        });
+      } else {
+        const noDataMessage = document.createElement('p');
+        noDataMessage.classList.add('no-data');
+        noDataMessage.textContent = 'No data available.';
+        container.appendChild(noDataMessage);
+      }
+    }
+  </script>
+
+</body>
+</html>
